@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-class Classifier():
+class Classifier(object):
     # Abstract class representing classifier object
     __metaclass__ = ABCMeta
     

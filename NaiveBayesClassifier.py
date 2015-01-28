@@ -1,7 +1,7 @@
 from Classifier import Classifier
 import cv2
 import numpy as np
-import jsonpickle
+import jsonpickle as jp
 
 class NaiveBayesClassifier(Classifier):
     # Implementation of naive bayes classifier
@@ -11,10 +11,18 @@ class NaiveBayesClassifier(Classifier):
         self.setErrorCount(0)
     
     def save(self):
-        pass
+        #file name to be added to the configuration file
+        file = open("naiveBayesClassifier.json", 'w')
+        jsonData = jp.encode(self.classifier)
+        file.write(jsonData)
+        file.close()
 
     def load(self):
-        pass
+        #file name to be added to the configuration file
+        file = open("naiveBayesClassifier.json")
+        jsonData = file.read()
+        self.classifier = jp.decode(jsonData)
+        file.close()
         
     def train(self, allFlag=False):
         return self.classifier.train(trainingDataMat, trainLabelsMat, update = allFlag)
