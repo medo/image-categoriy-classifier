@@ -11,22 +11,35 @@ class NaiveBayesClassifier(Classifier):
         self.setErrorCount(0)
     
     def save(self):
-        #file name to be added to the configuration file
-        file = open("naiveBayesClassifier.json", 'w')
-        jsonData = jp.encode(self.classifier)
-        file.write(jsonData)
-        file.close()
+        try:
+            #file name to be added to the configuration file
+            file = open("naiveBayesClassifier.json", 'w')
+            jsonData = jp.encode(self.classifier)
+            file.write(jsonData)
+            file.close()
+        except Exception, Argument:
+            print "Exception happened: ", Argument 
 
     def load(self):
-        #file name to be added to the configuration file
-        file = open("naiveBayesClassifier.json")
-        jsonData = file.read()
-        self.classifier = jp.decode(jsonData)
-        file.close()
-        
+        try:
+            #file name to be added to the configuration file
+            file = open("naiveBayesClassifier.json")
+            jsonData = file.read()
+            self.classifier = jp.decode(jsonData)
+            file.close()
+        except Exception, Argument:
+            print "Exception happened: ", Argument
+            
     def train(self, allFlag=False):
-        return self.classifier.train(trainingDataMat, trainLabelsMat, update = allFlag)
+        try:
+            return self.classifier.train(trainingDataMat, trainLabelsMat, update = allFlag)
+        except Exception, Argument:
+            print "Exception happened: ", Argument
         
     def predict(self, testData):
-        response, results = classifier.predict(testData)
-        return response
+        try:
+            response, results = classifier.predict(testData)
+            return response
+        except Exception, Argument:
+            print "Exception happened: ", Argument
+        
