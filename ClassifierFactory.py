@@ -7,7 +7,7 @@ class ClassifierFactory(object):
     # a classifier based on its type
     
     @staticmethod
-    def createClassifier(type):
+    def createClassifier(type='naive'):
         if type == 'naive':
             return NaiveBayesClassifier()
              

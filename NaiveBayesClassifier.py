@@ -2,6 +2,7 @@ from Classifier import Classifier
 import cv2
 import numpy as np
 import jsonpickle as jp
+import sys, traceback
 
 class NaiveBayesClassifier(Classifier):
     # Implementation of naive bayes classifier
@@ -32,9 +33,10 @@ class NaiveBayesClassifier(Classifier):
             
     def train(self, allFlag=False):
         try:
-            return self.classifier.train(trainingDataMat, trainLabelsMat, update = allFlag)
+            return self.classifier.train(self.trainingData, self.trainingLabels, update = allFlag)
         except Exception, Argument:
             print "Exception happened: ", Argument
+            traceback.print_stack()
         
     def predict(self, testData):
         try:
