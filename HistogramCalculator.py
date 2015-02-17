@@ -8,7 +8,6 @@ class HistogramCalculator:
 		self.vocab = vocab
 
 	def hist(self, sift):
-		#TODO optimize this code with numpy or C++
 		minVal = float("Inf")
 		minIndex = -1
 		count = 0.0
@@ -21,9 +20,7 @@ class HistogramCalculator:
 			for index in range(0, len(self.vocab)):
 				point2 = self.vocab[index]
 				distance = 0
-				for i in range(0, len(point1)):
-					distance += (point2[i] - point1[i]) ** 2
-				distance = sqrt(distance)
+				distance = sqrt(np.sum(np.power((point2 - point1), 2)))
 				if distance < minVal:
 					minVal = distance
 					minIndex = index

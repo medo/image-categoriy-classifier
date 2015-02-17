@@ -12,10 +12,10 @@ class SIFTManager:
             print "Exception happened: ", Argument
 
     @staticmethod
-    def save_to_local_file(descriptors, file):
+    def save_to_local_file(descriptors, filename):
         try:
-            file = open(file, 'w')
-            print("Writing file to %s" % file)
+            file = open(filename, 'w')
+            print("Writing file to %s" % filename)
             np.save(file, descriptors)
             file.close()
         except Exception, Argument:
