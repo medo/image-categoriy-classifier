@@ -40,7 +40,10 @@ def vocabulary(path, output_file):
 
 def training(path, output_file, vocab_file):
     if not os.path.isdir(path):
-        print("%s: no such directory" % (path)) 
+        print("%s: No such directory" % (path)) 
+        sys.exit(2)
+    if not os.path.isfile(vocab_file):
+        print("%s: No such file" % (vocab_file)) 
         sys.exit(2)
 
     print ("Loading vocabulary from: %s" % vocab_file)
