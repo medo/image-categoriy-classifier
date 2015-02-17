@@ -1,17 +1,13 @@
 from abc import ABCMeta, abstractmethod
+import cv2
+import numpy as np
+import jsonpickle as jp
+import sys, traceback
 
 class Classifier(object):
     # Abstract class representing classifier object
     __metaclass__ = ABCMeta
     
-    @abstractmethod
-    def save(self):
-        pass
-
-    @abstractmethod
-    def load(self):
-        pass
-        
     @abstractmethod
     def train(self, allFlag=False):
         pass

@@ -14,6 +14,8 @@ from ClassifierFactory import ClassifierFactory
 trainingDataMat	= np.matrix(np.zeros(shape = (80, 2))).astype('float32')
 
 trainLabels = np.zeros(80, dtype = np.float32)
+print "trainLabelsInfo"
+print type(trainLabels)
 
 for index in range(40):
     
@@ -28,6 +30,11 @@ for index in range(40):
     trainLabels[index+40] = 1
 
 trainLabelsMat = np.matrix(trainLabels)
+print "trainLabelsMatInfo"
+print type(trainLabelsMat)
+
+print "trainDataMatInfo"
+print type(trainingDataMat)
 
 print 'Training Data'
 print trainingDataMat
@@ -39,7 +46,7 @@ try:
     classifier.setTrainingData(trainingDataMat) #param = matrix of the training data
     classifier.setTrainingLabels(trainLabelsMat) #param = matrix of the training labels
     classifier.train()
-    classifier.save()
+    classifier.save("naiveBayesClassifier.json")
 
 except:
     traceback.print_stack()

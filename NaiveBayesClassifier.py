@@ -11,26 +11,45 @@ class NaiveBayesClassifier(Classifier):
         self.classifier = cv2.NormalBayesClassifier()
         self.setErrorCount(0)
     
-    def save(self):
+#     def save(self):
+#         try:
+#             #file name to be added to the configuration file
+#             file = open("naiveBayesClassifier.json", 'w')
+#             jsonData = jp.encode(self.classifier)
+#             file.write(jsonData)
+#             file.close()
+#         except Exception, Argument:
+#             print "Exception happened: ", Argument 
+# 
+#     def load(self):
+#         try:
+#             #file name to be added to the configuration file
+#             file = open("naiveBayesClassifier.json")
+#             jsonData = file.read()
+#             self.classifier = jp.decode(jsonData)
+#             file.close()
+#         except Exception, Argument:
+#             print "Exception happened: ", Argument
+#             
+    def save(self, outputFile):
         try:
-            #file name to be added to the configuration file
-            file = open("naiveBayesClassifier.json", 'w')
+            file = open(outputFile, 'w')
             jsonData = jp.encode(self.classifier)
             file.write(jsonData)
             file.close()
         except Exception, Argument:
             print "Exception happened: ", Argument 
-
-    def load(self):
+        
+    def load(self, outputFile):
         try:
-            #file name to be added to the configuration file
-            file = open("naiveBayesClassifier.json")
+            file = open(outputFile)
             jsonData = file.read()
             self.classifier = jp.decode(jsonData)
             file.close()
         except Exception, Argument:
             print "Exception happened: ", Argument
-            
+
+    
     def train(self, allFlag=False):
         try:
             return self.classifier.train(self.trainingData, self.trainingLabels, update = allFlag)
