@@ -1,7 +1,5 @@
 from abc import ABCMeta, abstractmethod
-import cv2
 import numpy as np
-import jsonpickle as jp
 import sys, traceback
 
 class Classifier(object):
@@ -16,6 +14,14 @@ class Classifier(object):
     def predict(self, testData):
         pass
     
+    @abstractmethod
+    def save(self, outputFile):
+        pass
+         
+    @abstractmethod   
+    def load(self, inputFile):
+        pass
+        
     def predict(self):
         self.predict(self, self.getTestingData())
         
@@ -34,6 +40,12 @@ class Classifier(object):
     def incrementErrorCount(self):
         self.errorCount += 1
 
+    def setEvaluationsCount(self, newCount):
+        self.evaluationsCount = newCount        
+
+    def incrementEvaluationsCount(self):
+        self.evaluationsCount += 1
+
     def getTrainingData(self):
         return self.trainingData  
         
@@ -46,11 +58,18 @@ class Classifier(object):
     def getErrorCount(self):
         return self.errorCount
         
+    def getEvaluationsCount(self):
+        return self.evaluationsCount
+        
     def evaluateData(self, testData, correctResponse):
-        response = self.predict(self, testData)
+        self.incrementEvaluationsCount()
+        response = self.predict(testData)
         
         if np.absolute(response - correctResponse) > 0.00001:
             self.incrementErrorCount()
+            return False
+        
+        return True
 
    
    
