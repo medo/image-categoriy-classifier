@@ -14,17 +14,11 @@ from ClassifierFactory import ClassifierFactory
 from DictionaryManager import DictionaryManager
 
 
-def __define_globals():
-    global cluster
-    global histCalculator
-    global classifier
-    global classesHashtable
-
-def __init_histogram_calculator(vocab_file):
-    print ("Loading vocabulary from: %s" % vocab_file)
-    vocab = SIFTManager.load_from_local_file(vocab_file)
-    histCalculator = HistogramCalculator(vocab)
-    return histCalculator
+# def __define_globals():
+#     global cluster
+#     global histCalculator
+#     global classifier
+#     global classesHashtable
 
 def __check_dir_condition(path):
     if not os.path.isdir(path):
@@ -43,23 +37,28 @@ def __get_image_features(img_file):
     extractor = FeatureExtractorFactory.newInstance(Image.from_local_directory(img_file))
     return extractor.extract_feature_vector()
                 
+def __init_histogram_calculator(vocab_file):
+    print ("Loading vocabulary from: %s" % vocab_file)
+    vocab = SIFTManager.load_from_local_file(vocab_file)
+    global histCalculator
+    histCalculator = HistogramCalculator(vocab)
+#     return histCalculator
+
 def __load_classifier(classifier_file):
     print ("Loading classifier from: %s" % classifier_file)
+    global classifier 
     classifier = ClassifierFactory.createClassifier()
     classifier.load(classifier_file) 
-    return classifier
+#     return classifier
 
 def __load_category_dictionary(dictionary_file):
     print ("Loading Classes Hashtable from: %s" % dictionary_file)
+    global classesHashtable
     classesHashtable = DictionaryManager()
     classesHashtable.loadFromFile(dictionary_file)
-    return classesHashtable
+#     return classesHashtable
 
 def vocabulary(path, output_file):
-#     if not os.path.isdir(path):
-#         print("%s: no such directory" % (path)) 
-#         sys.exit(2)
-    
     __check_dir_condition(path)
     
     count = 0
@@ -70,8 +69,6 @@ def vocabulary(path, output_file):
                 print i
                 count += 1
                 imgfile = "%s/%s" % (path, i)
-#                 extractor = FeatureExtractorFactory.newInstance(Image.from_local_directory(imgfile))
-#                 vector = extractor.extract_feature_vector()
                 vector = __get_image_features(imgfile)
                 cluster.add_to_cluster(vector)
             except Exception, Argument:
@@ -86,42 +83,17 @@ def vocabulary(path, output_file):
 
 
 def evaluating(path, vocab_file, classifier_file, dictionary_file):
-#     if not os.path.isdir(path):
-#         print("%s: No such directory" % (path)) 
-#         sys.exit(2)
-#     if not os.path.isfile(vocab_file):
-#         print("%s: No such file" % (vocab_file)) 
-#         sys.exit(2)
-#     if not os.path.isfile(vocab_file):
-#         print("%s: No such file" % (classifier_file)) 
-#         sys.exit(2)
-#     if not os.path.isfile(vocab_file):
-#         print("%s: No such file" % (dictionary_file)) 
-#         sys.exit(2)
-
     __check_dir_condition(path)
     __check_file_condition(vocab_file)
     __check_file_condition(classifier_file)
     __check_file_condition(dictionary_file)
     
-#     print ("Loading vocabulary from: %s" % vocab_file)
-#     vocab = SIFTManager.load_from_local_file(vocab_file)
-#     histCalculator = HistogramCalculator(vocab)
-    
-    histCalculator = __init_histogram_calculator(vocab_file)
-    
-#     print ("Loading classifier from: %s" % classifier_file)
-#     classifier = ClassifierFactory.createClassifier()
-#     classifier.load(classifier_file) 
-    
-    classifier = __load_classifier(classifier_file)
-    
-    
-#     print ("Loading Classes Hashtable from: %s" % dictionary_file)
-#     classesHashtable = DictionaryManager()
-#     classesHashtable.loadFromFile(dictionary_file)
-    
-    classesHashtable = __load_category_dictionary(dictionary_file)
+#     histCalculator = 
+    __init_histogram_calculator(vocab_file)  
+#     classifier = 
+    __load_classifier(classifier_file)    
+#     classesHashtable = 
+    __load_category_dictionary(dictionary_file)
     
     for d in os.listdir(path):
         subdir = ("%s/%s" % (path, d))
@@ -138,12 +110,10 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
                     try:
                         print f
                         imgfile = "%s/%s" % (subdir, f)
-#                         extractor = FeatureExtractorFactory.newInstance(Image.from_local_directory(imgfile))
-#                         vector = extractor.extract_feature_vector()
                         vector = __get_image_features(imgfile)
                         bow = histCalculator.hist(vector)
                         bow = __from_array_to_matrix(bow)
-                        print ("bow Type %s %s" % (type(bow), bow))
+#                         print ("bow Type %s %s" % (type(bow), bow))
                         totalPredictions += 1
                         correctResponse = classifier.evaluateData(bow[0], label)
                         if not correctResponse:
@@ -159,21 +129,11 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
     
 
 def training(path, output_file, vocab_file, dictionary_output_file):
-#     if not os.path.isdir(path):
-#         print("%s: No such directory" % (path)) 
-#         sys.exit(2)
-#     if not os.path.isfile(vocab_file):
-#         print("%s: No such file" % (vocab_file)) 
-#         sys.exit(2)
-    
     __check_dir_condition(path)
     __check_file_condition(vocab_file)
     
-#     print ("Loading vocabulary from: %s" % vocab_file)
-#     vocab = SIFTManager.load_from_local_file(vocab_file)
-#     histCalculator = HistogramCalculator(vocab)
-    
-    histCalculator = __init_histogram_calculator(vocab_file)
+#     histCalculator = 
+    __init_histogram_calculator(vocab_file)
     
     label = 0
     labelsVector = None
@@ -183,7 +143,7 @@ def training(path, output_file, vocab_file, dictionary_output_file):
     for d in os.listdir(path):
         subdir = ("%s/%s" % (path, d))
         if os.path.isdir(subdir):
-            #label = d
+            # label = d
             print ("Training label '%s'" % d)
             classesHashtable.addClass(label, d)
             for f in os.listdir(subdir):
@@ -191,11 +151,8 @@ def training(path, output_file, vocab_file, dictionary_output_file):
                     try:
                         print f
                         imgfile = "%s/%s" % (subdir, f)
-#                         extractor = FeatureExtractorFactory.newInstance(Image.from_local_directory(imgfile))
-#                         vector = extractor.extract_feature_vector()
                         vector = __get_image_features(imgfile)
                         bow = histCalculator.hist(vector)
-                        #print bow
                         
                         if bowVector == None:
                             bowVector = bow
@@ -215,16 +172,12 @@ def training(path, output_file, vocab_file, dictionary_output_file):
         print "Training Classifier"
         
         trainingDataMat = __from_array_to_matrix(bowVector) 
-        #np.matrix(bowVector).astype('float32')
         trainingLabelsMat = __from_array_to_matrix(labelsVector.ravel())
-        #np.matrix(labelsVector).astype('float32')
         
         classifier = ClassifierFactory.createClassifier()
         classifier.setTrainingData(trainingDataMat)
         classifier.setTrainingLabels(trainingLabelsMat)
         classifier.train()
-        print "Classifier"
-        print classifier
         print ("Saving Classifier in: %s" % output_file)
         classifier.save(output_file)
             
@@ -237,7 +190,7 @@ def training(path, output_file, vocab_file, dictionary_output_file):
 
 
 def main(args):
-    __define_globals()
+#     __define_globals()
     try:
         optlist, args = getopt.getopt(args, 'v:o:t:r:d:e:c:')
         optlist = dict(optlist)
