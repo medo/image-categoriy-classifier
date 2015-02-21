@@ -65,7 +65,7 @@ class Classifier(object):
         self.incrementEvaluationsCount()
         response = self.predict(testData)
         
-        if np.absolute(response - correctResponse) > 0.00001:
+        if correctResponse == None or np.absolute(response - correctResponse) > 0.00001:
             self.incrementErrorCount()
             return False
         

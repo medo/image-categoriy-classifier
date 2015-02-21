@@ -3,7 +3,6 @@
 import numpy as np
 import getopt, sys, os, traceback
 import cv2
-import jsonpickle
 
 from FeatureExtractorFactory import FeatureExtractorFactory
 from Image import Image
@@ -11,14 +10,9 @@ from KMeanCluster import KMeanCluster
 from SIFTManager import SIFTManager
 from HistogramCalculator import HistogramCalculator
 from ClassifierFactory import ClassifierFactory
-from DictionaryManager import DictionaryManager
+from CategoriesManager import CategoriesManager
 
-
-# def __define_globals():
-#     global cluster
-#     global histCalculator
-#     global classifier
-#     global classesHashtable
+# Private helper functions
 
 def __check_dir_condition(path):
     if not os.path.isdir(path):
@@ -29,6 +23,12 @@ def __check_file_condition(file):
     if not os.path.isfile(file):
         print("%s: No such file" % (file)) 
         sys.exit(2)
+        
+def __check_label_existence(label_name):
+    label_number = classesHashtable.getClassNumber(str(label_name))
+    if label_number == None:
+        print ("Label %s is not trained in our database" % label_name)
+    return label_number
     
 def __from_array_to_matrix(array_data):
     return np.matrix(array_data).astype('float32')
@@ -54,9 +54,26 @@ def __load_classifier(classifier_file):
 def __load_category_dictionary(dictionary_file):
     print ("Loading Classes Hashtable from: %s" % dictionary_file)
     global classesHashtable
-    classesHashtable = DictionaryManager()
+    classesHashtable = CategoriesManager()
     classesHashtable.loadFromFile(dictionary_file)
 #     return classesHashtable
+
+def __create_and_train_classifier():
+    global classifier
+    classifier = ClassifierFactory.createClassifier()
+    classifier.setTrainingData(trainingDataMat)
+    classifier.setTrainingLabels(trainingLabelsMat)
+    classifier.train()
+
+def __save_classifier(output_file):
+    print ("Saving Classifier in: %s" % output_file)
+    classifier.save(output_file)
+
+def __save_categories_dictionary(output_file):
+    print ("Saving Dictionary in: %s" % output_file)        
+    classesHashtable.saveToFile(output_file)
+
+# Main functions
 
 def vocabulary(path, output_file):
     __check_dir_condition(path)
@@ -88,11 +105,8 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
     __check_file_condition(classifier_file)
     __check_file_condition(dictionary_file)
     
-#     histCalculator = 
     __init_histogram_calculator(vocab_file)  
-#     classifier = 
     __load_classifier(classifier_file)    
-#     classesHashtable = 
     __load_category_dictionary(dictionary_file)
     
     for d in os.listdir(path):
@@ -101,10 +115,8 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
             print ("Evaluating label '%s'" % d)
             wrongPredictions = 0
             totalPredictions = 0
-            label = classesHashtable.getClassNumber(str(d))
-            if label == None:
-                print ("Label %s is not trained in our database" % d)
- 
+            label = __check_label_existence(d)
+
             for f in os.listdir(subdir):
                 if f.endswith(".jpg") or f.endswith(".png"):
                     try:
@@ -113,12 +125,11 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
                         vector = __get_image_features(imgfile)
                         bow = histCalculator.hist(vector)
                         bow = __from_array_to_matrix(bow)
-#                         print ("bow Type %s %s" % (type(bow), bow))
                         totalPredictions += 1
-                        correctResponse = classifier.evaluateData(bow[0], label)
+                        correctResponse = classifier.evaluateData(bow, label)
                         if not correctResponse:
                             wrongPredictions += 1
-                            
+                        
                     except Exception, Argument:
                         print "Exception happened: ", Argument
                         traceback.print_stack()
@@ -132,18 +143,17 @@ def training(path, output_file, vocab_file, dictionary_output_file):
     __check_dir_condition(path)
     __check_file_condition(vocab_file)
     
-#     histCalculator = 
     __init_histogram_calculator(vocab_file)
     
     label = 0
     labelsVector = None
     bowVector = None
-    classesHashtable = DictionaryManager()
+    global classesHashtable 
+    classesHashtable = CategoriesManager()
     
     for d in os.listdir(path):
         subdir = ("%s/%s" % (path, d))
         if os.path.isdir(subdir):
-            # label = d
             print ("Training label '%s'" % d)
             classesHashtable.addClass(label, d)
             for f in os.listdir(subdir):
@@ -159,9 +169,9 @@ def training(path, output_file, vocab_file, dictionary_output_file):
                         else:
                             bowVector = np.vstack((bowVector, bow))
                         if labelsVector == None:
-                            labelsVector = label
+                            labelsVector = np.array(label)
                         else:
-                            labelsVector = np.vstack((labelsVector, label))
+                            labelsVector = np.insert(labelsVector, labelsVector.size, label)
                         
                     except Exception, Argument:
                         print "Exception happened: ", Argument
@@ -171,18 +181,15 @@ def training(path, output_file, vocab_file, dictionary_output_file):
     try:
         print "Training Classifier"
         
-        trainingDataMat = __from_array_to_matrix(bowVector) 
-        trainingLabelsMat = __from_array_to_matrix(labelsVector.ravel())
         
-        classifier = ClassifierFactory.createClassifier()
-        classifier.setTrainingData(trainingDataMat)
-        classifier.setTrainingLabels(trainingLabelsMat)
-        classifier.train()
-        print ("Saving Classifier in: %s" % output_file)
-        classifier.save(output_file)
-            
-        print ("Saving Dictionary in: %s" % dictionary_output_file)        
-        classesHashtable.saveToFile(dictionary_output_file)
+        global trainingDataMat
+        trainingDataMat = __from_array_to_matrix(bowVector) 
+        global trainingLabelsMat
+        trainingLabelsMat = labelsVector
+        
+        __create_and_train_classifier()   
+        __save_classifier(output_file)
+        __save_categories_dictionary(dictionary_output_file)
 
     except Exception, Argument:
         print "Exception happened: ", Argument
@@ -190,7 +197,6 @@ def training(path, output_file, vocab_file, dictionary_output_file):
 
 
 def main(args):
-#     __define_globals()
     try:
         optlist, args = getopt.getopt(args, 'v:o:t:r:d:e:c:')
         optlist = dict(optlist)

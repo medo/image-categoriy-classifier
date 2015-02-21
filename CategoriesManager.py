@@ -1,7 +1,7 @@
 import pickle
 import sys, traceback
 
-class DictionaryManager:
+class CategoriesManager:
     
     def __init__(self):
         self.classes = {}
