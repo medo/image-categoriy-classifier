@@ -17,6 +17,7 @@ Open source Image category classifier
         
         <train_folder>: is a path to a folder where the training images will be found.
                         it should have a sub folder for each category named after its label.
+                        Note: if "Cow" and "cow" were 2 labels they will be considered the same.
         <ref_vocab_file>: is a path to a file where the vocabulary saved in step 1.
         <classifier_output_file>: is a path to a file where the trained classifier will be saved in.  
         <categories_dictionary_output_file>: is a path to a file where the categories dictionary will be saved in.
