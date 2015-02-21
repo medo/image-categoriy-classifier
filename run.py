@@ -42,21 +42,18 @@ def __init_histogram_calculator(vocab_file):
     vocab = SIFTManager.load_from_local_file(vocab_file)
     global histCalculator
     histCalculator = HistogramCalculator(vocab)
-#     return histCalculator
 
 def __load_classifier(classifier_file):
     print ("Loading classifier from: %s" % classifier_file)
     global classifier 
     classifier = ClassifierFactory.createClassifier()
-    classifier.load(classifier_file) 
-#     return classifier
+    classifier.load(classifier_file)
 
 def __load_category_dictionary(dictionary_file):
     print ("Loading Classes Hashtable from: %s" % dictionary_file)
     global classesHashtable
     classesHashtable = CategoriesManager()
     classesHashtable.loadFromFile(dictionary_file)
-#     return classesHashtable
 
 def __create_and_train_classifier():
     global classifier
@@ -156,6 +153,8 @@ def training(path, output_file, vocab_file, dictionary_output_file):
         if os.path.isdir(subdir):
             print ("Training label '%s'" % d)
             classesHashtable.addClass(label, d)
+            correctLabel = classesHashtable.getClassNumber(d)
+            
             for f in os.listdir(subdir):
                 if f.endswith(".jpg") or f.endswith(".png"):
                     try:
@@ -169,18 +168,18 @@ def training(path, output_file, vocab_file, dictionary_output_file):
                         else:
                             bowVector = np.vstack((bowVector, bow))
                         if labelsVector == None:
-                            labelsVector = np.array(label)
+                            labelsVector = np.array(correctLabel)
                         else:
-                            labelsVector = np.insert(labelsVector, labelsVector.size, label)
+                            labelsVector = np.insert(labelsVector, labelsVector.size, correctLabel)
                         
                     except Exception, Argument:
                         print "Exception happened: ", Argument
                         traceback.print_stack()
             
-            label += 1
+            if label == correctLabel:
+                label += 1
     try:
         print "Training Classifier"
-        
         
         global trainingDataMat
         trainingDataMat = __from_array_to_matrix(bowVector) 
