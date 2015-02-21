@@ -2,6 +2,7 @@ import pickle
 import sys, traceback
 
 class CategoriesManager:
+    """Class represents a dictionary that manages the classification categories's names and their equivalent numbers"""
     
     def __init__(self):
         self.classes = {}
@@ -39,3 +40,17 @@ class CategoriesManager:
             self.classes = pickle.load(file)
         except Exception, Argument:
             print "Exception happened: ", Argument
+            
+    def listCategories(self):
+        if self.classes == None:
+            return
+        
+        for k, v in self.classes.items():
+            print (k, " => ",v)
+        
+        
+        
+        
+        
+        
+        

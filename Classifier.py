@@ -3,7 +3,8 @@ import numpy as np
 import sys, traceback
 
 class Classifier(object):
-    # Abstract class representing classifier object
+    """Classifier class represents the super class of any implemented classifier"""
+    
     __metaclass__ = ABCMeta
     
     @abstractmethod
