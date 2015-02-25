@@ -24,8 +24,10 @@ Open source Image category classifier
           
 3) test and evaluate the performance of the classifier.
           
-          ./run.py -e <test_folder> -r <ref_vocab_file> -c <ref_classifier_file> -d <ref_categories_dictionary_file>
+          ./run.py <evaluation_type> <test_folder> -r <ref_vocab_file> -c <ref_classifier_file> -d <ref_categories_dictionary_file>
           
+        <evaluation_type>: use -e for printing counts for wrong predicitons.
+                           use -s for printing precision scores and their mean.
         <test_folder>: is a path to a folder where the testing images will be found.
                        it should have a sub folder for each category named after its label.
                        this label will be used to determine the correctness of the classifier's prediction.
