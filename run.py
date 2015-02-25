@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from sklearn.metrics import average_precision_score
+from sklearn.preprocessing import label_binarize
 import numpy as np
 import getopt, sys, os, traceback
 import cv2
@@ -162,7 +164,7 @@ def training(path, output_file, vocab_file, dictionary_output_file):
                         imgfile = "%s/%s" % (subdir, f)
                         vector = __get_image_features(imgfile)
                         bow = histCalculator.hist(vector)
-                        
+
                         if bowVector == None:
                             bowVector = bow
                         else:
@@ -171,7 +173,7 @@ def training(path, output_file, vocab_file, dictionary_output_file):
                             labelsVector = np.array(correctLabel)
                         else:
                             labelsVector = np.insert(labelsVector, labelsVector.size, correctLabel)
-                        
+
                     except Exception, Argument:
                         print "Exception happened: ", Argument
                         traceback.print_stack()
@@ -184,8 +186,11 @@ def training(path, output_file, vocab_file, dictionary_output_file):
         global trainingDataMat
         trainingDataMat = __from_array_to_matrix(bowVector) 
         global trainingLabelsMat
-        trainingLabelsMat = labelsVector
-        
+        trainingLabelsMat = __from_array_to_matrix(labelsVector)
+
+        print ("trainingDataMat", trainingDataMat)
+        print ("trainingLabelsMat", trainingLabelsMat)
+               
         __create_and_train_classifier()   
         __save_classifier(output_file)
         __save_categories_dictionary(dictionary_output_file)
@@ -193,6 +198,137 @@ def training(path, output_file, vocab_file, dictionary_output_file):
     except Exception, Argument:
         print "Exception happened: ", Argument
         traceback.print_stack()
+
+
+def evaluating2(path, vocab_file, classifier_file, dictionary_file):
+    __check_dir_condition(path)
+    __check_file_condition(vocab_file)
+    __check_file_condition(classifier_file)
+    __check_file_condition(dictionary_file)
+    
+    __init_histogram_calculator(vocab_file)  
+    __load_classifier(classifier_file)    
+    __load_category_dictionary(dictionary_file)
+    
+    yc_true = None
+    yc_scores = None
+    ym_true = None
+    ym_scores = None
+    ya_true = None
+    ya_scores = None
+    
+    for d in os.listdir(path):
+        subdir = ("%s/%s" % (path, d))
+        if os.path.isdir(subdir):
+            print ("Evaluating label '%s'" % d)
+#             wrongPredictions = 0
+#             totalPredictions = 0
+            label = __check_label_existence(d)
+
+            for f in os.listdir(subdir):
+                if f.endswith(".jpg") or f.endswith(".png"):
+                    try:
+                        print f
+                        imgfile = "%s/%s" % (subdir, f)
+                        vector = __get_image_features(imgfile)
+                        bow = histCalculator.hist(vector)
+                        bow = __from_array_to_matrix(bow)
+#                         totalPredictions += 1
+#                         correctResponse = classifier.evaluateData(bow, label)
+                        res = classifier.predict(bow)
+#                         if not correctResponse:
+#                             wrongPredictions += 1
+                        label = int(round(label))
+                        res = int(round(res))
+                        
+                        
+                        if res == 0:
+                            if yc_scores == None:
+                                yc_scores = np.array(1)
+                                ya_scores = np.array(0)
+                                ym_scores = np.array(0)
+                            else:
+                                yc_scores = np.insert(yc_scores, yc_scores.size, 1)
+                                ya_scores = np.insert(ya_scores, ya_scores.size, 0)
+                                ym_scores = np.insert(ym_scores, ym_scores.size, 0)
+                        elif res == 2:
+                            if yc_scores == None:
+                                yc_scores = np.array(0)
+                                ya_scores = np.array(1)
+                                ym_scores = np.array(0)
+                            else:
+                                yc_scores = np.insert(yc_scores, yc_scores.size, 0)
+                                ya_scores = np.insert(ya_scores, ya_scores.size, 1)
+                                ym_scores = np.insert(ym_scores, ym_scores.size, 0)
+                            
+                        else:
+                            if yc_scores == None:
+                                yc_scores = np.array(0)
+                                ya_scores = np.array(0)
+                                ym_scores = np.array(1)
+                            else:
+                                yc_scores = np.insert(yc_scores, yc_scores.size, 0)
+                                ya_scores = np.insert(ya_scores, ya_scores.size, 0)
+                                ym_scores = np.insert(ym_scores, ym_scores.size, 1)
+                            
+                        
+                        if label == 0:
+                            if yc_true == None:
+                                yc_true = np.array(1)
+                                ya_true = np.array(0)
+                                ym_true = np.array(0)
+                            else:
+                                yc_true = np.insert(yc_true, yc_true.size, 1)
+                                ya_true = np.insert(ya_true, ya_true.size, 0)
+                                ym_true = np.insert(ym_true, ym_true.size, 0)
+                                
+                        elif label == 1:
+                            if yc_true == None:
+                                yc_true = np.array(0)
+                                ya_true = np.array(0)
+                                ym_true = np.array(1)
+                            else:
+                                yc_true = np.insert(yc_true, yc_true.size, 0)
+                                ya_true = np.insert(ya_true, ya_true.size, 0)
+                                ym_true = np.insert(ym_true, ym_true.size, 1)
+                            
+                        
+                        else:
+                            if yc_true == None:
+                                yc_true = np.array(0)
+                                ya_true = np.array(1)
+                                ym_true = np.array(0)
+                            else:
+                                yc_true = np.insert(yc_true, yc_true.size, 0)
+                                ya_true = np.insert(ya_true, ya_true.size, 1)
+                                ym_true = np.insert(ym_true, ym_true.size, 0)
+                        
+                    except Exception, Argument:
+                        print "Exception happened: ", Argument
+                        traceback.print_stack()
+            
+#             print ("Label %s results:\n%d were wrongly predicted from %d" % (d, wrongPredictions, totalPredictions))
+    
+#     print ("Final results:\n%d were wrongly predicted from %d" % (classifier.getErrorCount(), classifier.getEvaluationsCount()))
+#     y_true = y_true.astype('int')
+#     print "y_true: " + str(y_true) + " " + str(type(y_true))
+#     print "y_scores: " + str(y_scores) + " " + str(type(y_scores))
+#      print "The average precision score: " + str(average_precision_score(label_binarize(y_true, classes=[0, 1, 2]), label_binarize(y_scores, classes=[0, 1, 2])))
+    print "cow precision: "
+    print average_precision_score(label_binarize(yc_true, classes=[0,1]), label_binarize(yc_scores, classes=[0,1]))
+    print average_precision_score(yc_true, yc_scores) 
+    print "motorbike precision: "
+    print average_precision_score(label_binarize(ym_true, classes=[0,1]), label_binarize(ym_scores, classes=[0,1]))
+    print average_precision_score(ym_true, ym_scores)
+    print "car precision: "
+    print average_precision_score(label_binarize(ya_true, classes=[0,1]), label_binarize(ya_scores, classes=[0,1]))
+    print average_precision_score(ya_true, ya_scores)
+    
+
+def listAll(temp_file):
+    classesHashtable = CategoriesManager()
+    classesHashtable.loadFromFile(temp_file)
+    classesHashtable.listCategories()
 
 
 def main(args):
@@ -222,7 +358,11 @@ def main(args):
                 
                 evaluating(arg, optlist['-r'], optlist['-c'], optlist['-d'])
                 sys.exit()
-
+            
+            if opt == '-d':
+                listAll(arg)
+                sys.exit()
+            
     except getopt.GetoptError, e:
         print str(e)
         sys.exit(2)

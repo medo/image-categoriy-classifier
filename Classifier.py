@@ -66,6 +66,8 @@ class Classifier(object):
         self.incrementEvaluationsCount()
         response = self.predict(testData)
         
+        print ("It is predicted to be ", response, " ,and the correct is ", correctResponse)
+        
         if correctResponse == None or np.absolute(response - correctResponse) > 0.00001:
             self.incrementErrorCount()
             return False

@@ -24,7 +24,7 @@ class HistogramCalculator:
 				if distance < minVal:
 					minVal = distance
 					minIndex = index
-			histogram[minIndex] += 1
+			histogram[minIndex] += 1			
 		return histogram
 
 
