@@ -48,7 +48,10 @@ class CategoriesManager:
         for k, v in self.classes.items():
             print (k, " => ",v)
         
-        
+    def getCategoriesCount(self):
+        if self.classes == None:
+            return 0
+        return len(self.classes) / 2   
         
         
         
