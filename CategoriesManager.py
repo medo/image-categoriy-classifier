@@ -16,14 +16,14 @@ class CategoriesManager:
         
         return True
     
-    def getKeyValue(self, key):
+    def __getKeyValue(self, key):
         return self.classes.get(key)
     
     def getClassNumber(self, name):
-        return self.getKeyValue(name)
+        return self.__getKeyValue(name)
     
     def getClassName(self, number):
-        return self.getKeyValue(number)
+        return self.__getKeyValue(number)
     
     def saveToFile(self, outputFile):
         try:
