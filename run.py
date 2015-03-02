@@ -68,8 +68,6 @@ def __create_and_train_classifier():
     global classifier
     classifier = ClassifierFactory.createClassifier()
     classifier.setTrainingData(trainingDataMat)
-    print "hazem1",trainingDataMat
-    print "hazem2", trainingLabelsMat
     classifier.setTrainingLabels(trainingLabelsMat)
     classifier.train()
 
