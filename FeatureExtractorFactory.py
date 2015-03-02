@@ -3,5 +3,5 @@ from FeatureExtractor import FeatureExtractor
 class FeatureExtractorFactory:
 
     @staticmethod
-    def newInstance(image):
-        return FeatureExtractor(image)
+    def newInstance(image,memory):
+        return FeatureExtractor(image,memory)

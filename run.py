@@ -36,8 +36,15 @@ def __from_array_to_matrix(array_data):
     return np.matrix(array_data).astype('float32')
 
 def __get_image_features(img_file):
-    extractor = FeatureExtractorFactory.newInstance(Image.from_local_directory(img_file))
+    extractor = FeatureExtractorFactory.newInstance(Image.from_local_directory(img_file),False)
     return extractor.extract_feature_vector()
+
+def __get_image_features_memory(img):
+    extractor = FeatureExtractorFactory.newInstance(img,True)
+    return extractor.extract_feature_vector()
+
+def __load_image(img):
+    return cv2.imread(img)
                 
 def __init_histogram_calculator(vocab_file):
     print ("Loading vocabulary from: %s" % vocab_file)
@@ -61,6 +68,8 @@ def __create_and_train_classifier():
     global classifier
     classifier = ClassifierFactory.createClassifier()
     classifier.setTrainingData(trainingDataMat)
+    print "hazem1",trainingDataMat
+    print "hazem2", trainingLabelsMat
     classifier.setTrainingLabels(trainingLabelsMat)
     classifier.train()
 
@@ -108,7 +117,6 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
     __init_histogram_calculator(vocab_file)  
     __load_classifier(classifier_file)    
     __load_category_dictionary(dictionary_file)
-    
     for d in os.listdir(path):
         subdir = ("%s/%s" % (path, d))
         if os.path.isdir(subdir):
@@ -116,14 +124,48 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
             wrongPredictions = 0
             totalPredictions = 0
             label = __check_label_existence(d)
-
             for f in os.listdir(subdir):
+                print f
                 if f.endswith(".jpg") or f.endswith(".png"):
                     try:
                         print f
                         imgfile = "%s/%s" % (subdir, f)
                         vector = __get_image_features(imgfile)
                         bow = histCalculator.hist(vector)
+                        imgfile = "%s/%s" % (subdir, f)
+                        image = __load_image(imgfile)
+                        rows = len(image)
+                        cols = len(image[0])
+                        if rows%2==0 and cols%2==0:
+                            quad1= image[:(rows/2),:(cols/2)]
+                            quad2= image[:(rows/2),(cols/2):]
+                            quad3 = image[(rows/2):,:(cols/2)]
+                            quad4=image[(rows/2):,(cols/2):]
+                        if rows%2==1 and cols%2==1:
+                            quad1= image[:((rows+1)/2),:((cols+1)/2)]
+                            quad2= image[:((rows+1)/2),(cols/2)+1:]
+                            quad3 = image[((rows+1)/2):,:((cols+1)/2)]
+                            quad4 = image[((rows+1)/2):,((cols+1)/2):]
+                        if rows%2==1 and cols%2==0:
+                            quad1= image[:((rows+1)/2),:((cols+1)/2)]
+                            quad2 = image[:((rows+1)/2),(cols/2):]
+                            quad3 = image[((rows+1)/2):,:((cols)/2)]
+                            quad4 = image[((rows+1)/2):,(cols/2):]
+                            #quad4 = image[2:, 2:]
+                        if rows%2==0 and cols%2==1:
+                            quad1= image[:((rows)/2),:((cols+1)/2)]
+                            quad2 = image[:((rows)/2),(cols/2)+1:]
+                            quad3 = image[(rows/2):,:((cols+1)/2)]
+                            quad4 = image[(rows/2):,((cols+1)/2):]
+                        vector1 = __get_image_features_memory(quad1)
+                        vector2 = __get_image_features_memory(quad2)
+                        vector3 = __get_image_features_memory(quad3)
+                        vector4 = __get_image_features_memory(quad4)
+                        bow1 = histCalculator.hist(vector1)
+                        bow2 = histCalculator.hist(vector2)
+                        bow3 = histCalculator.hist(vector3)
+                        bow4 = histCalculator.hist(vector4)
+                        bow  = np.hstack((bow1,bow2,bow3,bow4))
                         bow = __from_array_to_matrix(bow)
                         totalPredictions += 1
                         correctResponse = classifier.evaluateData(bow, label)
@@ -163,8 +205,39 @@ def training(path, output_file, vocab_file, dictionary_output_file):
                     try:
                         print f
                         imgfile = "%s/%s" % (subdir, f)
-                        vector = __get_image_features(imgfile)
-                        bow = histCalculator.hist(vector)
+                        image = __load_image(imgfile)
+                        rows = len(image)
+                        cols = len(image[0])
+                        if rows%2==0 and cols%2==0:
+                            quad1= image[:(rows/2),:(cols/2)]
+                            quad2= image[:(rows/2),(cols/2):]
+                            quad3 = image[(rows/2):,:(cols/2)]
+                            quad4=image[(rows/2):,(cols/2):]
+                        if rows%2==1 and cols%2==1:
+                            quad1= image[:((rows+1)/2),:((cols+1)/2)]
+                            quad2= image[:((rows+1)/2),(cols/2)+1:]
+                            quad3 = image[((rows+1)/2):,:((cols+1)/2)]
+                            quad4 = image[((rows+1)/2):,((cols+1)/2):]
+                        if rows%2==1 and cols%2==0:
+                            quad1= image[:((rows+1)/2),:((cols+1)/2)]
+                            quad2 = image[:((rows+1)/2),(cols/2):]
+                            quad3 = image[((rows+1)/2):,:((cols)/2)]
+                            quad4 = image[((rows+1)/2):,(cols/2):]
+                            #quad4 = image[2:, 2:]
+                        if rows%2==0 and cols%2==1:
+                            quad1= image[:((rows)/2),:((cols+1)/2)]
+                            quad2 = image[:((rows)/2),(cols/2)+1:]
+                            quad3 = image[(rows/2):,:((cols+1)/2)]
+                            quad4 = image[(rows/2):,((cols+1)/2):]
+                        vector1 = __get_image_features_memory(quad1)
+                        vector2 = __get_image_features_memory(quad2)
+                        vector3 = __get_image_features_memory(quad3)
+                        vector4 = __get_image_features_memory(quad4)
+                        bow1 = histCalculator.hist(vector1)
+                        bow2 = histCalculator.hist(vector2)
+                        bow3 = histCalculator.hist(vector3)
+                        bow4 = histCalculator.hist(vector4)
+                        bow  = np.hstack((bow1,bow2,bow3,bow4))
 
                         if bowVector == None:
                             bowVector = bow
@@ -174,7 +247,6 @@ def training(path, output_file, vocab_file, dictionary_output_file):
                             labelsVector = np.array(correctLabel)
                         else:
                             labelsVector = np.insert(labelsVector, labelsVector.size, correctLabel)
-
                     except Exception, Argument:
                         print "Exception happened: ", Argument
                         traceback.print_stack()

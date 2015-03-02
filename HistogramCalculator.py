@@ -8,6 +8,7 @@ class HistogramCalculator:
 		self.vocab = vocab
 
 	def hist(self, sift):
+		normalize=0
 		minVal = float("Inf")
 		minIndex = -1
 		count = 0.0
@@ -24,7 +25,11 @@ class HistogramCalculator:
 				if distance < minVal:
 					minVal = distance
 					minIndex = index
-			histogram[minIndex] += 1			
+			histogram[minIndex] += 1
+			normalize+=1
+		for x in range(0, len(histogram)):
+			if normalize != 0:
+				histogram[x] = histogram[x]/normalize		
 		return histogram
 
 
