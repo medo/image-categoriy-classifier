@@ -11,7 +11,7 @@ before_install:
   - sudo apt-get update
 
 install:
-  - sudo apt-get install liblapack-dev python-scipy
+  - sudo apt-get install build-essential python-dev python-setuptools python-numpy python-scipy libatlas-dev libatlas3gf-base
   - pip install numpy
   - pip install scipy
   - pip install -U scikit-learn 
