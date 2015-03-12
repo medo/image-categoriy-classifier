@@ -13,7 +13,7 @@ before_install:
 install:
   - sudo apt-get install build-essential python-dev python-setuptools python-numpy
   - sudo apt-get build-dep python-scipy
-  - travis_wait pip install -U scipy
+  - travis_wait pip install -v -U scipy
   - pip install -U scikit-learn 
  
 before_script:
