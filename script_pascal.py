@@ -37,7 +37,7 @@ def labelToCategory(path,pascalData):
 	if set(allCategories)==set(allCategories2)==set(allCategories3):	
 		allCategories= list(set(allCategories))
 		with open(("%s/%s" % (path, 'label_to_category.csv')), 'w+') as labelCatDict:
-			for i in xrange(0,len(allCategories)): ###########
+			for i in xrange(0,len(allCategories)): 
 				fileWriter = csv.writer(labelCatDict, delimiter=',', quoting=csv.QUOTE_MINIMAL) 
 				label = [i+1] 
 				catName = [allCategories[i]] 
@@ -56,9 +56,9 @@ def generateTrainDB(path):
 		os.makedirs(pascalTrainFolder)
 	allCategories=[]
 	allCategories = labelToCategory(path,pascalData)
-	with open(("%s/%s" % (path, 'label_to_category.csv'))) as labelCatDict: ##############
-		for i in xrange(0,len(allCategories)): ###########
-			catFileRead = allCategories[i] + "_train.txt" #HERE #Please make identical folder as original Pascal
+	with open(("%s/%s" % (path, 'label_to_category.csv'))) as labelCatDict: 
+		for i in xrange(0,len(allCategories)): 
+			catFileRead = allCategories[i] + "_train.txt"
 			fileNameWrite = "train_" + allCategories[i] + ".csv"
 			with open(("%s/%s" % (pascalData, catFileRead))) as fileReader:
 				spamreader = csv.reader(fileReader, delimiter=' ')
@@ -66,7 +66,8 @@ def generateTrainDB(path):
 					if '-1' not in i and '1' in i:
 						with open(("%s/%s" % (pascalTrainFolder, fileNameWrite)), 'a') as fileWriter2:
 							catWriter = csv.writer(fileWriter2, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-							imgName = i[0]
+							imgName = ("%s/%s/%s/%s" % (path,"VOC2007" ,"JPEGImages",i[0]))
+							imgName += ".jpg"
 							catWriter.writerow([imgName])
 
 def generateTrainValidateDB(path):
@@ -86,7 +87,8 @@ def generateTrainValidateDB(path):
 					if '-1' not in i and '1' in i:
 						with open(("%s/%s" % (pascTrValFolder, fileNameWrite)), 'a') as fileWriter2:
 							catWriter = csv.writer(fileWriter2, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-							imgName = i[0]
+							imgName = ("%s/%s/%s/%s" % (path,"VOC2007" ,"JPEGImages",i[0]))
+							imgName += ".jpg"
 							catWriter.writerow([imgName])
 
 def generateValidateDB(path):
@@ -106,7 +108,8 @@ def generateValidateDB(path):
 					if '-1' not in i and '1' in i:
 						with open(("%s/%s" % (pascValFolder, fileNameWrite)), 'a') as fileWriter2:
 							catWriter = csv.writer(fileWriter2, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-							imgName = i[0]
+							imgName = ("%s/%s/%s/%s" % (path,"VOC2007" ,"JPEGImages",i[0]))
+							imgName += ".jpg"
 							catWriter.writerow([imgName])
 	
 def main(args):
