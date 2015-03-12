@@ -14,6 +14,7 @@ install:
   - sudo apt-get install build-essential python-dev python-setuptools python-numpy
   - sudo apt-get build-dep python-scipy
   - sudo pip install -v -U scipy
+  - print "test"
   - pip install -U scikit-learn 
  
 before_script:
