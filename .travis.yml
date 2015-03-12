@@ -3,14 +3,20 @@ python:
   - "2.6"
   - "2.7"
 
-# command to install dependencies
+before_install:
+  - sudo apt-get update
+
 install:
   - pip install numpy
   - pip install -U scikit-learn 
-# command to run tests
-script:
+ 
+before_script:
   - make
+
+script:
   - make vocabulary
   - make training
   - make evaluate
+
+after_script:
   - make clean
