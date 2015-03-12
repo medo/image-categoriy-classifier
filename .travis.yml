@@ -13,7 +13,7 @@ before_install:
 install:
   - sudo apt-get install build-essential python-dev python-setuptools python-numpy python-scipy libatlas-dev libatlas3gf-base
   - sudo apt-get install libblas3gf libblas-doc libblas-dev liblapack3gf liblapack-doc liblapack-dev
-  - sudo apt-get install gfortran-4.6
+  - sudo apt-get install libamd2.2.0 libc6 libgcc1 libgfortran3 libumfpack5.4.0 libstdc++6 gfortran python-all-dev libatlas-base-dev
   - pip install numpy
   - pip install scipy
   - pip install -U scikit-learn 
