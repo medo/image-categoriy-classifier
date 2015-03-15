@@ -16,6 +16,60 @@ from CategoriesManager import CategoriesManager
 
 # Private helper functions
 
+def __quad_generator(quad,image):
+    rows = len(image)
+    cols = len(image[0])
+    case1=case2=case3=case4=False
+    if rows%2==0:
+        if cols%2==0:
+            case1=True
+        else:
+            case4=True
+    else:
+        if cols%2==1:
+            case2=True
+        else:
+            case3=True
+
+    if case1:
+        if quad==1:
+            return image[:(rows/2),:(cols/2)]
+        if quad==2:
+            return image[:(rows/2),(cols/2):]
+        if quad==3:
+            return image[(rows/2):,:(cols/2)]
+        if quad==4:
+            return image[(rows/2):,(cols/2):]
+
+    if case2:
+        if quad==1:
+            return image[:((rows+1)/2),:((cols+1)/2)]
+        if quad==2:
+            return image[:((rows+1)/2),(cols/2)+1:]
+        if quad==3:
+            return image[((rows+1)/2):,:((cols+1)/2)]
+        if quad==4:
+            return image[((rows+1)/2):,((cols+1)/2):]
+
+    if case3:
+        if quad==1:
+            return image[:((rows+1)/2),:((cols+1)/2)]
+        if quad==2:
+            return image[:((rows+1)/2),(cols/2):]
+        if quad==3:
+            return image[((rows+1)/2):,:((cols)/2)]
+        if quad==4:
+            return image[((rows+1)/2):,(cols/2):]
+    if case4:
+        if quad==1:
+            return image[:((rows)/2),:((cols+1)/2)]
+        if quad==2:
+            return image[:((rows)/2),(cols/2)+1:]
+        if quad==3:
+            return image[(rows/2):,:((cols+1)/2)]
+        if quad==4:
+            return image[(rows/2):,((cols+1)/2):]
+
 def __check_dir_condition(path):
     if not os.path.isdir(path):
         print("%s: No such directory" % (path)) 
@@ -132,33 +186,10 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
                         bow = histCalculator.hist(vector)
                         imgfile = "%s/%s" % (subdir, f)
                         image = __load_image(imgfile)
-                        rows = len(image)
-                        cols = len(image[0])
-                        if rows%2==0 and cols%2==0:
-                            quad1= image[:(rows/2),:(cols/2)]
-                            quad2= image[:(rows/2),(cols/2):]
-                            quad3 = image[(rows/2):,:(cols/2)]
-                            quad4=image[(rows/2):,(cols/2):]
-                        if rows%2==1 and cols%2==1:
-                            quad1= image[:((rows+1)/2),:((cols+1)/2)]
-                            quad2= image[:((rows+1)/2),(cols/2)+1:]
-                            quad3 = image[((rows+1)/2):,:((cols+1)/2)]
-                            quad4 = image[((rows+1)/2):,((cols+1)/2):]
-                        if rows%2==1 and cols%2==0:
-                            quad1= image[:((rows+1)/2),:((cols+1)/2)]
-                            quad2 = image[:((rows+1)/2),(cols/2):]
-                            quad3 = image[((rows+1)/2):,:((cols)/2)]
-                            quad4 = image[((rows+1)/2):,(cols/2):]
-                            #quad4 = image[2:, 2:]
-                        if rows%2==0 and cols%2==1:
-                            quad1= image[:((rows)/2),:((cols+1)/2)]
-                            quad2 = image[:((rows)/2),(cols/2)+1:]
-                            quad3 = image[(rows/2):,:((cols+1)/2)]
-                            quad4 = image[(rows/2):,((cols+1)/2):]
-                        vector1 = __get_image_features_memory(quad1)
-                        vector2 = __get_image_features_memory(quad2)
-                        vector3 = __get_image_features_memory(quad3)
-                        vector4 = __get_image_features_memory(quad4)
+                        vector1 = __get_image_features_memory(__quad_generator(1,image))
+                        vector2 = __get_image_features_memory(__quad_generator(2,image))
+                        vector3 = __get_image_features_memory(__quad_generator(3,image))
+                        vector4 = __get_image_features_memory(__quad_generator(4,image))
                         bow1 = histCalculator.hist(vector1)
                         bow2 = histCalculator.hist(vector2)
                         bow3 = histCalculator.hist(vector3)
@@ -204,33 +235,10 @@ def training(path, output_file, vocab_file, dictionary_output_file):
                         print f
                         imgfile = "%s/%s" % (subdir, f)
                         image = __load_image(imgfile)
-                        rows = len(image)
-                        cols = len(image[0])
-                        if rows%2==0 and cols%2==0:
-                            quad1= image[:(rows/2),:(cols/2)]
-                            quad2= image[:(rows/2),(cols/2):]
-                            quad3 = image[(rows/2):,:(cols/2)]
-                            quad4=image[(rows/2):,(cols/2):]
-                        if rows%2==1 and cols%2==1:
-                            quad1= image[:((rows+1)/2),:((cols+1)/2)]
-                            quad2= image[:((rows+1)/2),(cols/2)+1:]
-                            quad3 = image[((rows+1)/2):,:((cols+1)/2)]
-                            quad4 = image[((rows+1)/2):,((cols+1)/2):]
-                        if rows%2==1 and cols%2==0:
-                            quad1= image[:((rows+1)/2),:((cols+1)/2)]
-                            quad2 = image[:((rows+1)/2),(cols/2):]
-                            quad3 = image[((rows+1)/2):,:((cols)/2)]
-                            quad4 = image[((rows+1)/2):,(cols/2):]
-                            #quad4 = image[2:, 2:]
-                        if rows%2==0 and cols%2==1:
-                            quad1= image[:((rows)/2),:((cols+1)/2)]
-                            quad2 = image[:((rows)/2),(cols/2)+1:]
-                            quad3 = image[(rows/2):,:((cols+1)/2)]
-                            quad4 = image[(rows/2):,((cols+1)/2):]
-                        vector1 = __get_image_features_memory(quad1)
-                        vector2 = __get_image_features_memory(quad2)
-                        vector3 = __get_image_features_memory(quad3)
-                        vector4 = __get_image_features_memory(quad4)
+                        vector1 = __get_image_features_memory(__quad_generator(1,image))
+                        vector2 = __get_image_features_memory(__quad_generator(2,image))
+                        vector3 = __get_image_features_memory(__quad_generator(3,image))
+                        vector4 = __get_image_features_memory(__quad_generator(4,image))
                         bow1 = histCalculator.hist(vector1)
                         bow2 = histCalculator.hist(vector2)
                         bow3 = histCalculator.hist(vector3)
