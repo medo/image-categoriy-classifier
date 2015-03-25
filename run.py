@@ -17,60 +17,6 @@ from EvenImageDivider import EvenImageDivider
 
 # Private helper functions
 
-def __quad_generator(quad,image):
-    rows = len(image)
-    cols = len(image[0])
-    case1=case2=case3=case4=False
-    if rows%2==0:
-        if cols%2==0:
-            case1=True
-        else:
-            case4=True
-    else:
-        if cols%2==1:
-            case2=True
-        else:
-            case3=True
-
-    if case1:
-        if quad==1:
-            return image[:(rows/2),:(cols/2)]
-        if quad==2:
-            return image[:(rows/2),(cols/2):]
-        if quad==3:
-            return image[(rows/2):,:(cols/2)]
-        if quad==4:
-            return image[(rows/2):,(cols/2):]
-
-    if case2:
-        if quad==1:
-            return image[:((rows+1)/2),:((cols+1)/2)]
-        if quad==2:
-            return image[:((rows+1)/2),(cols/2)+1:]
-        if quad==3:
-            return image[((rows+1)/2):,:((cols+1)/2)]
-        if quad==4:
-            return image[((rows+1)/2):,((cols+1)/2):]
-
-    if case3:
-        if quad==1:
-            return image[:((rows+1)/2),:((cols+1)/2)]
-        if quad==2:
-            return image[:((rows+1)/2),(cols/2):]
-        if quad==3:
-            return image[((rows+1)/2):,:((cols)/2)]
-        if quad==4:
-            return image[((rows+1)/2):,(cols/2):]
-    if case4:
-        if quad==1:
-            return image[:((rows)/2),:((cols+1)/2)]
-        if quad==2:
-            return image[:((rows)/2),(cols/2)+1:]
-        if quad==3:
-            return image[(rows/2):,:((cols+1)/2)]
-        if quad==4:
-            return image[(rows/2):,((cols+1)/2):]
-
 def __check_dir_condition(path):
     if not os.path.isdir(path):
         print("%s: No such directory" % (path)) 
@@ -244,7 +190,7 @@ def training(path, output_file, vocab_file, dictionary_output_file):
                             else:
                                 mergedBowVector = np.hstack((mergedBowVector,bow))
                         bow = __from_array_to_matrix(mergedBowVector)
-                        
+
                         if bowVector == None:
                             bowVector = bow
                         else:
