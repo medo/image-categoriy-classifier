@@ -1,5 +1,6 @@
 from NaiveBayesClassifier import NaiveBayesClassifier
 from Classifier import Classifier
+from SVMClassifier import SVMClassifier
 import cv2
 
 class ClassifierFactory(object):
@@ -7,7 +8,10 @@ class ClassifierFactory(object):
     # a classifier based on its type
     
     @staticmethod
-    def createClassifier(type='naive'):
+    def createClassifier(type='svm'):
         if type == 'naive':
             return NaiveBayesClassifier()
+
+        if type == 'svm':
+        	return SVMClassifier()
              
