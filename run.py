@@ -13,6 +13,7 @@ from SIFTManager import SIFTManager
 from HistogramCalculator import HistogramCalculator
 from ClassifierFactory import ClassifierFactory
 from CategoriesManager import CategoriesManager
+from EvenImageDivider import EvenImageDivider
 
 # Private helper functions
 
@@ -115,6 +116,7 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
     __init_histogram_calculator(vocab_file)  
     __load_classifier(classifier_file)    
     __load_category_dictionary(dictionary_file)
+    bowVector = None
     for d in os.listdir(path):
         subdir = ("%s/%s" % (path, d))
         if os.path.isdir(subdir):
@@ -128,48 +130,21 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
                     try:
                         print f
                         imgfile = "%s/%s" % (subdir, f)
-                        vector = __get_image_features(imgfile)
-                        bow = histCalculator.hist(vector)
-                        imgfile = "%s/%s" % (subdir, f)
                         image = __load_image(imgfile)
-                        rows = len(image)
-                        cols = len(image[0])
-                        if rows%2==0 and cols%2==0:
-                            quad1= image[:(rows/2),:(cols/2)]
-                            quad2= image[:(rows/2),(cols/2):]
-                            quad3 = image[(rows/2):,:(cols/2)]
-                            quad4=image[(rows/2):,(cols/2):]
-                        if rows%2==1 and cols%2==1:
-                            quad1= image[:((rows+1)/2),:((cols+1)/2)]
-                            quad2= image[:((rows+1)/2),(cols/2)+1:]
-                            quad3 = image[((rows+1)/2):,:((cols+1)/2)]
-                            quad4 = image[((rows+1)/2):,((cols+1)/2):]
-                        if rows%2==1 and cols%2==0:
-                            quad1= image[:((rows+1)/2),:((cols+1)/2)]
-                            quad2 = image[:((rows+1)/2),(cols/2):]
-                            quad3 = image[((rows+1)/2):,:((cols)/2)]
-                            quad4 = image[((rows+1)/2):,(cols/2):]
-                            #quad4 = image[2:, 2:]
-                        if rows%2==0 and cols%2==1:
-                            quad1= image[:((rows)/2),:((cols+1)/2)]
-                            quad2 = image[:((rows)/2),(cols/2)+1:]
-                            quad3 = image[(rows/2):,:((cols+1)/2)]
-                            quad4 = image[(rows/2):,((cols+1)/2):]
-                        vector1 = __get_image_features_memory(quad1)
-                        vector2 = __get_image_features_memory(quad2)
-                        vector3 = __get_image_features_memory(quad3)
-                        vector4 = __get_image_features_memory(quad4)
-                        bow1 = histCalculator.hist(vector1)
-                        bow2 = histCalculator.hist(vector2)
-                        bow3 = histCalculator.hist(vector3)
-                        bow4 = histCalculator.hist(vector4)
-                        bow  = np.hstack((bow1,bow2,bow3,bow4))
-                        bow = __from_array_to_matrix(bow)
+                        dividedImage=EvenImageDivider(image,4)
+                        for i in xrange(1,(dividedImage.n + 1)):
+                            sectorOfFeatures = __get_image_features_memory(dividedImage.divider(i))
+                            bow = histCalculator.hist(sectorOfFeatures)
+                            if bowVector == None:
+                                bowVector = bow
+                            else:
+                                bowVector = np.hstack((bowVector,bow))
+                        bow = __from_array_to_matrix(bowVector)
                         totalPredictions += 1
                         correctResponse = classifier.evaluateData(bow, label)
                         if not correctResponse:
                             wrongPredictions += 1
-                        
+                        bowVector=None
                     except Exception, Argument:
                         print "Exception happened: ", Argument
                         traceback.print_stack()
@@ -188,6 +163,7 @@ def training(path, output_file, vocab_file, dictionary_output_file):
     label = 0
     labelsVector = None
     bowVector = None
+    mergedBowVector = None
     global classesHashtable 
     classesHashtable = CategoriesManager()
     
@@ -204,38 +180,16 @@ def training(path, output_file, vocab_file, dictionary_output_file):
                         print f
                         imgfile = "%s/%s" % (subdir, f)
                         image = __load_image(imgfile)
-                        rows = len(image)
-                        cols = len(image[0])
-                        if rows%2==0 and cols%2==0:
-                            quad1= image[:(rows/2),:(cols/2)]
-                            quad2= image[:(rows/2),(cols/2):]
-                            quad3 = image[(rows/2):,:(cols/2)]
-                            quad4=image[(rows/2):,(cols/2):]
-                        if rows%2==1 and cols%2==1:
-                            quad1= image[:((rows+1)/2),:((cols+1)/2)]
-                            quad2= image[:((rows+1)/2),(cols/2)+1:]
-                            quad3 = image[((rows+1)/2):,:((cols+1)/2)]
-                            quad4 = image[((rows+1)/2):,((cols+1)/2):]
-                        if rows%2==1 and cols%2==0:
-                            quad1= image[:((rows+1)/2),:((cols+1)/2)]
-                            quad2 = image[:((rows+1)/2),(cols/2):]
-                            quad3 = image[((rows+1)/2):,:((cols)/2)]
-                            quad4 = image[((rows+1)/2):,(cols/2):]
-                            #quad4 = image[2:, 2:]
-                        if rows%2==0 and cols%2==1:
-                            quad1= image[:((rows)/2),:((cols+1)/2)]
-                            quad2 = image[:((rows)/2),(cols/2)+1:]
-                            quad3 = image[(rows/2):,:((cols+1)/2)]
-                            quad4 = image[(rows/2):,((cols+1)/2):]
-                        vector1 = __get_image_features_memory(quad1)
-                        vector2 = __get_image_features_memory(quad2)
-                        vector3 = __get_image_features_memory(quad3)
-                        vector4 = __get_image_features_memory(quad4)
-                        bow1 = histCalculator.hist(vector1)
-                        bow2 = histCalculator.hist(vector2)
-                        bow3 = histCalculator.hist(vector3)
-                        bow4 = histCalculator.hist(vector4)
-                        bow  = np.hstack((bow1,bow2,bow3,bow4))
+
+                        dividedImage=EvenImageDivider(image,4)
+                        for i in xrange(1,(dividedImage.n + 1)):
+                            sectorOfFeatures = __get_image_features_memory(dividedImage.divider(i))
+                            bow = histCalculator.hist(sectorOfFeatures)
+                            if mergedBowVector == None:
+                                mergedBowVector = bow
+                            else:
+                                mergedBowVector = np.hstack((mergedBowVector,bow))
+                        bow = __from_array_to_matrix(mergedBowVector)
 
                         if bowVector == None:
                             bowVector = bow
@@ -245,6 +199,7 @@ def training(path, output_file, vocab_file, dictionary_output_file):
                             labelsVector = np.array(correctLabel)
                         else:
                             labelsVector = np.insert(labelsVector, labelsVector.size, correctLabel)
+                        mergedBowVector= None
                     except Exception, Argument:
                         print "Exception happened: ", Argument
                         traceback.print_stack()
