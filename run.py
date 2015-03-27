@@ -14,6 +14,7 @@ from HistogramCalculator import HistogramCalculator
 from ClassifierFactory import ClassifierFactory
 from CategoriesManager import CategoriesManager
 from EvenImageDivider import EvenImageDivider
+from BagOfWordsVectorCalculator import BagOfWordsVectorCalculator
 
 # Private helper functions
 
@@ -52,6 +53,10 @@ def __init_histogram_calculator(vocab_file):
     vocab = SIFTManager.load_from_local_file(vocab_file)
     global histCalculator
     histCalculator = HistogramCalculator(vocab)
+
+def __init_bow_vector_calculator():
+    global bowCalculator 
+    bowCalculator = BagOfWordsVectorCalculator()
 
 def __load_classifier(classifier_file):
     print ("Loading classifier from: %s" % classifier_file)
@@ -112,7 +117,7 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
     __check_file_condition(vocab_file)
     __check_file_condition(classifier_file)
     __check_file_condition(dictionary_file)
-    
+    __init_bow_vector_calculator()
     __init_histogram_calculator(vocab_file)  
     __load_classifier(classifier_file)    
     __load_category_dictionary(dictionary_file)
@@ -135,16 +140,13 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
                         for i in xrange(1,(dividedImage.n + 1)):
                             sectorOfFeatures = __get_image_features_memory(dividedImage.divider(i))
                             bow = histCalculator.hist(sectorOfFeatures)
-                            if bowVector == None:
-                                bowVector = bow
-                            else:
-                                bowVector = np.hstack((bowVector,bow))
-                        bow = __from_array_to_matrix(bowVector)
+                            bowCalculator.createMergedBow(bow)
+                        bow = __from_array_to_matrix(bowCalculator.getMergedBow())
                         totalPredictions += 1
                         correctResponse = classifier.evaluateData(bow, label)
                         if not correctResponse:
                             wrongPredictions += 1
-                        bowVector=None
+                        bowCalculator.emptyMergedBow()
                     except Exception, Argument:
                         print "Exception happened: ", Argument
                         traceback.print_stack()
@@ -159,11 +161,10 @@ def training(path, output_file, vocab_file, dictionary_output_file):
     __check_file_condition(vocab_file)
     
     __init_histogram_calculator(vocab_file)
+    __init_bow_vector_calculator()
     
     label = 0
     labelsVector = None
-    bowVector = None
-    mergedBowVector = None
     global classesHashtable 
     classesHashtable = CategoriesManager()
     
@@ -185,21 +186,17 @@ def training(path, output_file, vocab_file, dictionary_output_file):
                         for i in xrange(1,(dividedImage.n + 1)):
                             sectorOfFeatures = __get_image_features_memory(dividedImage.divider(i))
                             bow = histCalculator.hist(sectorOfFeatures)
-                            if mergedBowVector == None:
-                                mergedBowVector = bow
-                            else:
-                                mergedBowVector = np.hstack((mergedBowVector,bow))
-                        bow = __from_array_to_matrix(mergedBowVector)
+                            bowCalculator.createMergedBow(bow)
+            
+                        bow = __from_array_to_matrix(bowCalculator.getMergedBow())
+                        bowCalculator.createBowVector(bow)
 
-                        if bowVector == None:
-                            bowVector = bow
-                        else:
-                            bowVector = np.vstack((bowVector, bow))
                         if labelsVector == None:
                             labelsVector = np.array(correctLabel)
                         else:
                             labelsVector = np.insert(labelsVector, labelsVector.size, correctLabel)
-                        mergedBowVector= None
+
+                        bowCalculator.emptyMergedBow()
                     except Exception, Argument:
                         print "Exception happened: ", Argument
                         traceback.print_stack()
@@ -210,7 +207,7 @@ def training(path, output_file, vocab_file, dictionary_output_file):
         print "Training Classifier"
         
         global trainingDataMat
-        trainingDataMat = __from_array_to_matrix(bowVector) 
+        trainingDataMat = __from_array_to_matrix(bowCalculator.getBowVector()) 
         global trainingLabelsMat
         trainingLabelsMat = __from_array_to_matrix(labelsVector)
 
