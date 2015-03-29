@@ -121,7 +121,7 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
     __init_histogram_calculator(vocab_file)  
     __load_classifier(classifier_file)    
     __load_category_dictionary(dictionary_file)
-    bowVector = None
+
     for d in os.listdir(path):
         subdir = ("%s/%s" % (path, d))
         if os.path.isdir(subdir):
