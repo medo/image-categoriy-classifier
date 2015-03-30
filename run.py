@@ -93,7 +93,6 @@ def __save_categories_dictionary(output_file):
     classesHashtable.saveToFile(output_file)
 
 def __get_image_features_and_cluster_from_csv(path,fileName):
-    #cluster = KMeanCluster(100)
     with open(("%s/%s" % (path, fileName))) as fileReader:
         reader = csv.reader(fileReader, delimiter=' ')
         for i in reader:
@@ -191,7 +190,7 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
             
             print ("Label %s results:\n%d were wrongly predicted from %d" % (d, wrongPredictions, totalPredictions))
         else:
-            print "hello"
+
             break
     for f in os.listdir(path):
         if f.endswith(".csv"):
@@ -243,7 +242,6 @@ def training(path, output_file, vocab_file, dictionary_output_file):
         if d.startswith("."):
             continue
         subdir = ("%s/%s" % (path, d))
-        #print "wtf", path
         if os.path.isdir(subdir):
             print "You're training using a regular dataset"
             print ("Training label '%s'" % d)
@@ -277,17 +275,7 @@ def training(path, output_file, vocab_file, dictionary_output_file):
         else:
             print "You're training using a Pascal dataset"
             break
-    #print "path= ", path pascal_trainval directory
-    #execfile('script_pascal.py')
-    #subprocess.call(['YourMomma.py', "Hazem"])
-    #sys.argv = ['/Users/ZzimBoo/anaconda/envs/py27opencv/finalPascal/image-categoriy-classifier']
-    #execfile('script_pascal.py')
-    #subprocess.Popen(['python', 'script_pascal.py', '/Users/ZzimBoo/anaconda/envs/py27opencv/finalPascal/image-categoriy-classifier']).communicate()
-    #print "YEAH", os.path.realpath(__file__)
-    #subprocess.call(['python', 'script_pascal.py', '/Users/ZzimBoo/anaconda/envs/py27opencv/finalPascal/image-categoriy-classifier'])
-    #sys.argv.append('/Users/ZzimBoo/anaconda/envs/py27opencv/finalPascal/image-categoriy-classifier')
-    #execfile('script_pascal.py')
-    #print "MACH WEITER DU ARSCHLOCH"
+
     classesHashtable.loadFromFile(dictionary_output_file)
     for f in os.listdir(path):
         if f.endswith(".csv"):
@@ -295,7 +283,6 @@ def training(path, output_file, vocab_file, dictionary_output_file):
                 categoryName = __get_category_name_from_file_name(f)
                 print ("Training label '%s'" % categoryName)
                 correctLabel = classesHashtable.getClassNumber(categoryName)
-                print "correct label = ", correctLabel
 
                 with open(("%s/%s" % (path, f))) as fileReader:
                     reader = csv.reader(fileReader, delimiter=' ')
@@ -334,9 +321,6 @@ def training(path, output_file, vocab_file, dictionary_output_file):
     except Exception, Argument:
         print "Exception happened: ", Argument
         traceback.print_stack()
-
-        
-    #Trains a label more than once? LOL?
 
 def get_precision_scores(path, vocab_file, classifier_file, dictionary_file):
     __check_dir_condition(path)
