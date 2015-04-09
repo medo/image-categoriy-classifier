@@ -15,10 +15,10 @@ before_install:
   - sudo apt-get install -qq cython
   - sudo apt-get build-dep python-scipy
   - sudo apt-get install -qq python-scipy
+  - sudo apt-get install -qq python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
 
 install:
   - pip install --upgrade pip
-  - pip install matplotlib
   - pip install -U scikit-learn 
  
 before_script:
