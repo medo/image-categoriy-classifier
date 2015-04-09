@@ -17,13 +17,13 @@ before_install:
 install:
   - pip install --upgrade pip
   - pip install numpy
+  - pip install git+http://github.com/scipy/scipy/
   - pip install -U scikit-learn 
  
 before_script:
   - make
 
 script:
-  - python setup.py develop
   - make vocabulary
   - make training
   - make evaluate
