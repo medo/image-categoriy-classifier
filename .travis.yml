@@ -11,15 +11,16 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq build-essential python-dev python-setuptools python-numpy
   - sudo apt-get install -qq liblapack-dev libatlas-dev gfortran python-opencv
+  - sudo apt-get install -qq cython
   - sudo apt-get build-dep python-scipy
   - sudo apt-get install -qq python-scipy
 
 install:
   - pip install --upgrade pip
   - pip install numpy
-  - easy_install cython
+  - pip install cython
   - brew install gcc
-  - pip install git+http://github.com/scipy/scipy/
+  - pip install scipy
   - pip install -U scikit-learn 
  
 before_script:
