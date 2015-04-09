@@ -9,11 +9,10 @@ notifications:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq build-essential python-dev python-setuptools python-numpy
-  - sudo apt-get install -qq liblapack-dev libatlas-dev gfortran python-opencv
+  - sudo apt-get install -qq build-essential python-dev python-setuptools
+  - sudo apt-get install -qq liblapack-dev libatlas-dev python-opencv
   - sudo apt-get install -qq libatlas-base-dev gfortran
   - sudo apt-get install -qq cython
-  - sudo apt-get build-dep python-numpy python-scipy python-matplotlib ipython
   - sudo apt-get install -qq python-numpy python-scipy python-matplotlib ipython
 
 install:
