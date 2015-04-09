@@ -12,11 +12,11 @@ before_install:
   - sudo apt-get install -qq build-essential python-dev python-setuptools python-numpy
   - sudo apt-get install -qq liblapack-dev libatlas-dev gfortran python-opencv
   - sudo apt-get build-dep python-scipy
+  - sudo apt-get install python-scipy
 
 install:
   - pip install --upgrade pip
   - pip install numpy
-  - pip install -v -U scipy
   - print "test"
   - pip install -U scikit-learn 
  
