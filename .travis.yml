@@ -19,7 +19,6 @@ install:
   - pip install --upgrade pip
   - pip install numpy
   - pip install cython
-  - brew install gcc
   - pip install scipy
   - pip install -U scikit-learn 
  
