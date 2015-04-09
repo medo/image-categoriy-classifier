@@ -8,12 +8,15 @@ notifications:
 
 
 before_install:
-  - sudo apt-get update
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq build-essential python-dev python-setuptools python-numpy
+  - sudo apt-get install -qq liblapack-dev libatlas-dev gfortran python-opencv
+  - sudo apt-get build-dep python-scipy
 
 install:
-  - sudo apt-get install build-essential python-dev python-setuptools python-numpy
-  - sudo apt-get build-dep python-scipy
-  - sudo pip install -v -U scipy
+  - pip install pyopencv
+  - pip install numpy
+  - pip install -v -U scipy
   - print "test"
   - pip install -U scikit-learn 
  
