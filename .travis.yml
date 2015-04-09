@@ -17,7 +17,6 @@ before_install:
 install:
   - pip install --upgrade pip
   - pip install numpy
-  - print "test"
   - pip install -U scikit-learn 
  
 before_script:
