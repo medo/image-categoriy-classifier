@@ -15,6 +15,7 @@ from ClassifierFactory import ClassifierFactory
 from CategoriesManager import CategoriesManager
 from EvenImageDivider import EvenImageDivider
 from BagOfWordsVectorCalculator import BagOfWordsVectorCalculator
+from AveragePrecisionCalculator import AveragePrecisionCalculator
 
 # Private helper functions
 
@@ -47,7 +48,10 @@ def __get_image_features_memory(img):
 
 def __load_image(img):
     return cv2.imread(img)
-                
+
+def __belongs_to_class(instance,correctClass):
+    return instance.__class__.__name__ == correctClass            
+
 def __init_histogram_calculator(vocab_file):
     print ("Loading vocabulary from: %s" % vocab_file)
     vocab = SIFTManager.load_from_local_file(vocab_file)
@@ -70,12 +74,21 @@ def __load_category_dictionary(dictionary_file):
     classesHashtable = CategoriesManager()
     classesHashtable.loadFromFile(dictionary_file)
 
+def __init_average_precision_calculator(path,dictionary_file):
+    global averagePrecisionCalc
+    averagePrecisionCalc = AveragePrecisionCalculator(path,dictionary_file)
+    averagePrecisionCalc.generate_binary_labels()
+
 def __create_and_train_classifier():
     global classifier
     classifier = ClassifierFactory.createClassifier()
-    classifier.setTrainingData(trainingDataMat)
-    classifier.setTrainingLabels(trainingLabelsMat)
-    classifier.train()
+    if __belongs_to_class(classifier,"SVMClassifierScikit"):
+        classifier.setTrainingData(trainingDataMat)
+        classifier.setTrainingLabels(trainingLabelsMat)
+    else:
+        classifier.setTrainingData(__from_array_to_matrix(trainingDataMat))
+        classifier.setTrainingLabels(__from_array_to_matrix(trainingLabelsMat))
+        classifier.train()
 
 def __save_classifier(output_file):
     print ("Saving Classifier in: %s" % output_file)
@@ -118,12 +131,16 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
     __check_file_condition(classifier_file)
     __check_file_condition(dictionary_file)
     __init_bow_vector_calculator()
-    __init_histogram_calculator(vocab_file)  
-    __load_classifier(classifier_file)    
+    __init_histogram_calculator(vocab_file)
     __load_category_dictionary(dictionary_file)
+    __init_average_precision_calculator(path,dictionary_file)  
+    __load_classifier(classifier_file)    
 
     for d in os.listdir(path):
+        if d.startswith("."):
+            continue
         subdir = ("%s/%s" % (path, d))
+        averagePrecisionCalc.add_evaluated_category_name(d)
         if os.path.isdir(subdir):
             print ("Evaluating label '%s'" % d)
             wrongPredictions = 0
@@ -144,6 +161,9 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
                         bow = __from_array_to_matrix(bowCalculator.getMergedBow())
                         totalPredictions += 1
                         correctResponse = classifier.evaluateData(bow, label)
+                        confidenceScore = classifier.calculateScore(bow)
+                        confidenceScore = confidenceScore[0][classifier.predict(bow)]
+                        averagePrecisionCalc.generate_score_list(confidenceScore)
                         if not correctResponse:
                             wrongPredictions += 1
                         bowCalculator.emptyMergedBow()
@@ -154,6 +174,15 @@ def evaluating(path, vocab_file, classifier_file, dictionary_file):
             print ("Label %s results:\n%d were wrongly predicted from %d" % (d, wrongPredictions, totalPredictions))
     
     print ("Final results:\n%d were wrongly predicted from %d" % (classifier.getErrorCount(), classifier.getEvaluationsCount()))
+
+    averagePrecisionCalc.generate_tuples_list()
+    averagePrecisionCalc.split_tuples_list_per_class()
+    for i in range(0,averagePrecisionCalc.get_evaluated_categories_count()):
+        specific = averagePrecisionCalc.get_specific_tuples_list(i)
+        y_true = averagePrecisionCalc.extract_y_true_from_specific_tuples_list(specific)
+        y_score = averagePrecisionCalc.extract_score_from_specific_tuples_list(specific)
+        print "Average Precision Score for class '%s' = " % (averagePrecisionCalc.get_evaluated_category_names())[i], averagePrecisionCalc.calculate_average_precision_score(y_true,y_score)
+    print "The Mean Average Precision (MAP) = ", averagePrecisionCalc.calculate_map()
     
 
 def training(path, output_file, vocab_file, dictionary_output_file):
@@ -337,7 +366,7 @@ def main(args):
     except getopt.GetoptError, e:
         print str(e)
         sys.exit(2)
-	
-	
+    
+    
 if __name__ == "__main__":
     main(sys.argv[1:])
