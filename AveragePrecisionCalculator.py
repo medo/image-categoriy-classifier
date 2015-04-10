@@ -79,7 +79,6 @@ class AveragePrecisionCalculator:
 			if self.tuplesList == None:
 				self.tuplesList = zip(self.binary_labels[i],self.scoreList)
 				self.sort_list_of_tuples_descendingly()
-				print self.tuplesList
 			else:
 				tupledList = zip(self.binary_labels[i],self.scoreList)
 				self.sort_given_list_of_tuples_descendingly(tupledList)
