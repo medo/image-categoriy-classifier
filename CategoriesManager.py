@@ -51,9 +51,9 @@ class CategoriesManager:
     def getCategoriesCount(self):
         if self.classes == None:
             return 0
-        return len(self.classes) / 2   
-        
-        
-        
+        return len(self.classes) / 2
+
+    def getMinLabel(self):
+        return min(self.classes)
         
         

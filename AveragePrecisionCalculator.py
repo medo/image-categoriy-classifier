@@ -33,18 +33,29 @@ class AveragePrecisionCalculator:
 			print ("Label %s is not trained in our database" % label_name)
 		return label_number
 
+	def get_category_name_from_file_name(self,csv_file_name):
+		categoryName = csv_file_name.split("_")
+		categoryName = categoryName[1].split(".csv")[0]
+		return categoryName
+
+	def file_len(self,fname):
+		with open(fname) as f:
+			for i, l in enumerate(f):
+				pass
+		return i + 1
+
 	def generate_binary_labels(self):
 		self.load_category_dictionary()
 		path = self.path
 		y_true = None
 		count = 0
-		alle = None
+		labelCorrEachImage = None
 		for d in os.listdir(path):
 			subdir = ("%s/%s" % (path,d))
-			if alle == None:
-				alle = y_true
+			if labelCorrEachImage == None:
+				labelCorrEachImage = y_true
 			else:
-				alle = np.hstack((alle,y_true))
+				labelCorrEachImage = np.hstack((labelCorrEachImage,y_true))
 			if os.path.isdir(subdir):
 				label = self.check_label_existence(d)
 				if label == None:
@@ -54,9 +65,20 @@ class AveragePrecisionCalculator:
 						count +=1
 				y_true = [label] * count
 				count = 0
-		alle = np.hstack((alle, y_true))
-		allCategories = range(0,classesHashtable.getCategoriesCount())
-		required = label_binarize(alle,allCategories)
+			else:
+				if not d.endswith(".csv"):
+					continue
+				label = self.check_label_existence(self.get_category_name_from_file_name(d))
+				if label == None:
+					continue
+				file_path = ("%s/%s" % (path,d))
+				count += self.file_len(file_path)
+				y_true = [label] * count
+				count = 0
+		labelCorrEachImage = np.hstack((labelCorrEachImage, y_true))
+		labelsStartFrom = classesHashtable.getMinLabel()
+		allCategories = range(labelsStartFrom,classesHashtable.getCategoriesCount()+1)
+		required = label_binarize(labelCorrEachImage,allCategories)
 		cols = len(required[0])
 		for i in range (0,cols):
 			if self.binary_labels == None:
